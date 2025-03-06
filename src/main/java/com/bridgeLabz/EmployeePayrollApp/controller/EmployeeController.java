@@ -1,8 +1,8 @@
 package com.bridgeLabz.EmployeePayrollApp.controller;
 
-import com.bridgeLabz.EmployeePayrollApp.dto.EmployeeDTO;
 import com.bridgeLabz.EmployeePayrollApp.model.Employee;
-import com.bridgeLabz.EmployeePayrollApp.repository.EmployeeRepository;
+import com.bridgeLabz.EmployeePayrollApp.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,54 +13,26 @@ import java.util.Optional;
 @RequestMapping("/employees")
 public class EmployeeController {
 
-    private final EmployeeRepository employeeRepository;
-
-    public EmployeeController(EmployeeRepository employeeRepository) {
-        this.employeeRepository = employeeRepository;
-    }
+    @Autowired
+    private EmployeeService employeeService;
 
     // GET all employees
     @GetMapping
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        return employeeService.getAllEmployees();
     }
 
     // GET employee by ID
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
-        Optional<Employee> employee = employeeRepository.findById(id);
-        return employee.map(ResponseEntity::ok)
+        return employeeService.getEmployeeById(id)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ✅ POST - Create new employee using DTO
+    // POST - Create new employee
     @PostMapping
-    public Employee createEmployee(@RequestBody EmployeeDTO employeeDTO) {
-        Employee employee = new Employee(employeeDTO.getName(), employeeDTO.getSalary(), employeeDTO.getDepartment());
-        return employeeRepository.save(employee);
-    }
-
-    // ✅ PUT - Update existing employee using DTO
-    @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
-        return employeeRepository.findById(id)
-                .map(employee -> {
-                    employee.setName(employeeDTO.getName());
-                    employee.setSalary(employeeDTO.getSalary());
-                    employee.setDepartment(employeeDTO.getDepartment());
-                    return ResponseEntity.ok(employeeRepository.save(employee));
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // DELETE - Remove employee
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public Employee createEmployee(@RequestBody Employee employee) {
+        return employeeService.createEmployee(employee);
     }
 }
