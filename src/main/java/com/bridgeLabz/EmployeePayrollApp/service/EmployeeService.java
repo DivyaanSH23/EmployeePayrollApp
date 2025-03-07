@@ -34,6 +34,7 @@ public class EmployeeService implements EmployeeServiceInterface {
         return employeeRepository.findById(id).map(employee -> {
             employee.setName(updatedEmployee.getName());
             employee.setSalary(updatedEmployee.getSalary());
+            employee.setDepartment(updatedEmployee.getDepartment());
             return employeeRepository.save(employee);
         });
     }
