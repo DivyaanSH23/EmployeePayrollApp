@@ -3,8 +3,10 @@ package com.bridgeLabz.EmployeePayrollApp.service;
 import com.bridgeLabz.EmployeePayrollApp.interfaces.EmployeeServiceInterface;
 import com.bridgeLabz.EmployeePayrollApp.model.Employee;
 import com.bridgeLabz.EmployeePayrollApp.repository.EmployeeRepository;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +28,11 @@ public class EmployeeService implements EmployeeServiceInterface {
 
     @Override
     public Employee createEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+        try {
+            return employeeRepository.save(employee);
+        } catch (ConstraintViolationException e) {
+            throw new IllegalArgumentException("Invalid employee data: " + e.getMessage());
+        }
     }
 
     @Override
@@ -35,7 +41,12 @@ public class EmployeeService implements EmployeeServiceInterface {
             employee.setName(updatedEmployee.getName());
             employee.setSalary(updatedEmployee.getSalary());
             employee.setDepartment(updatedEmployee.getDepartment());
-            return employeeRepository.save(employee);
+
+            try {
+                return employeeRepository.save(employee);
+            } catch (ConstraintViolationException e) {
+                throw new IllegalArgumentException("Invalid employee data: " + e.getMessage());
+            }
         });
     }
 
